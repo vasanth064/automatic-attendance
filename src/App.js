@@ -1,80 +1,97 @@
 import React, { useEffect, useState } from 'react';
-import VideoSnapshot from 'video-snapshot';
-import {
-  getFullFaceDescription,
-  loadModels,
-  createMatcher,
-} from './faceApi/faceapi';
-const faceData = require('./faceApi/faceData/faceData.json');
+import { loadModels } from './api/faceapi';
+import { getVideoDuration, getSnapShot } from './api/snapShotapi';
+import './App.css';
 function App() {
-  const [shots, setShots] = useState([]);
-  let snapShots = [];
-  let snapShotDescription = [];
-  let macth = [];
+	const [shots, setShots] = useState([]);
+	const [students, setStudents] = useState([]);
+	const [status, setStatus] = useState('Input A Video');
+	const [stausCode, setStausCode] = useState(0);
 
-  useEffect(() => {
-    loadModels();
-  }, []);
-  const getVideoDuration = (file) =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const media = new Audio(reader.result);
-        media.onloadedmetadata = () => resolve(media.duration);
-      };
-      reader.readAsDataURL(file);
-      reader.onerror = (error) => reject(error);
-    });
+	useEffect(() => {
+		loadModels();
+	}, []);
 
-  const handleChange = async (e) => {
-    const duration = await getVideoDuration(e.target.files[0]);
-    const snapShotTime = [
-      3,
-      Math.round(duration / 4),
-      Math.round(duration / 2),
-      Math.round(duration - 3),
-    ];
+	useEffect(() => {
+		switch (stausCode) {
+			case 0:
+				setStatus('Input A Video');
+				break;
+			case 1:
+				setStatus('Video Uploaded');
+				break;
+			case 2:
+				setStatus('Talking Snapshots');
+				break;
+			case 3:
+				setStatus('Doing Face Recogination');
+				break;
+			case 4:
+				setStatus('Sorting Students');
+				break;
+			case 5:
+				setStatus('Completed');
+				break;
+			default:
+				break;
+		}
+	}, [stausCode]);
 
-    await getSnapShot(e.target.files[0], snapShotTime);
-  };
+	const handleChange = async (e) => {
+		setShots([]);
+		setStudents([]);
+		if (e.target.files[0]) {
+			setStausCode(1);
+			const duration = await getVideoDuration(e.target.files[0]);
+			setStausCode(2);
+			const snapShotTime = [
+				2,
+				Math.round(duration / 4),
+				Math.round(duration / 2),
+				Math.round(duration - 2),
+			];
+			const shot = await getSnapShot(e.target.files[0], snapShotTime);
+			shot[0].map((item) => setShots((prevItems) => [...prevItems, item]));
+			setStausCode(3);
+			let macth = await shot[1];
+			setStausCode(4);
+			let studentnames = [];
+			macth.map((item) => studentnames.push(item._label));
+			studentnames = [...new Set(studentnames)];
+			studentnames = studentnames.filter((value) => {
+				return value !== 'unknown';
+			});
+			setStudents(studentnames);
+			setStausCode(5);
+		}
+		setStausCode(0);
+	};
 
-  const getSnapShot = async (video, snapShotTime) => {
-    for (let time in snapShotTime) {
-      let snapshoter = new VideoSnapshot(video);
-      let previewSrc = await snapshoter.takeSnapshot(snapShotTime[time]);
-      snapShots.push(previewSrc);
-      setShots((prevItems) => [...prevItems, previewSrc]);
-    }
-    getFaceRecognition(snapShots);
-  };
-
-  const getFaceRecognition = async (snapShots) => {
-    for (let shot of snapShots) {
-      let fullFaceDescription = await getFullFaceDescription(shot);
-      snapShotDescription.push(fullFaceDescription);
-    }
-    for (let item of snapShotDescription) {
-      for (let i of item) {
-        const faceMatcher = await createMatcher(faceData);
-        macth.push(faceMatcher.findBestMatch(i.descriptor));
-      }
-    }
-    console.log(macth);
-  };
-
-  return (
-    <div>
-      <input type='file' onChange={(e) => handleChange(e)} />
-      <div className='container'>
-        {shots &&
-          shots.map((shot, index) => (
-            <div key={index} className='imageContainer'>
-              <img src={shot} alt={shot} id='image' />
-            </div>
-          ))}
-      </div>
-    </div>
-  );
+	return (
+		<div style={{ postion: 'relative' }}>
+			<div className={stausCode === 0 ? 'status' : 'statusActive'}>
+				<h1>{status}</h1>
+			</div>
+			<div className='container'>
+				<input
+					type='file'
+					onChange={(e) => handleChange(e)}
+					className='fileInput'
+				/>
+				<div className='imageContainer'>
+					{shots &&
+						shots.map((item, index) => (
+							<img src={item} alt={item} key={index} id='image' width='50%' />
+						))}
+				</div>
+				{students.length >= 1 ? <h1>Students Present In Video</h1> : null}
+				<div className='attendess'>
+					{students &&
+						students.map((item, index) => <h3 key={index}>{item}</h3>)}
+				</div>
+			</div>
+		</div>
+	);
 }
 
 export default App;
