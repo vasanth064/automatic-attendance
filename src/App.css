@@ -1,47 +1,74 @@
+*,
+*::after,
+*::before {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  text-decoration: none;
+}
 .imageContainer {
-	display: flex;
-	flex-wrap: wrap;
-	width: 50%;
+  display: flex;
+  flex-wrap: wrap;
+  width: 50%;
 }
 .container {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	flex-direction: column;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
 }
 .fileInput {
-	margin: 2rem;
+  margin: 2rem;
 }
 body {
-	font-family: roboto, sans-serif;
+  font-family: roboto, sans-serif;
 }
 .attendess {
-	display: flex;
-	flex-direction: column;
-	flex-wrap: wrap;
-	height: 18rem;
-	width: 50%;
-	justify-content: center;
-	align-items: center;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  height: 18rem;
+  width: 50%;
+  justify-content: center;
+  align-items: center;
 }
 .status {
-	position: relative;
-	display: block;
-	width: auto;
-	height: auto;
-	text-align: center;
-	z-index: auto;
+  position: relative;
+  display: block;
+  width: auto;
+  height: auto;
+  text-align: center;
+  z-index: auto;
 }
 .statusActive {
-	position: absolute;
-	overflow: hidden;
-	top: 0;
-	right: 0;
-	display: grid;
-	place-items: center;
-	width: 100vw;
-	height: 100vh;
-	background-color: rgba(0, 0, 0, 0.85);
-	z-index: 100;
-	color: white;
+  position: absolute;
+  overflow: hidden;
+  top: 0;
+  right: 0;
+  display: grid;
+  place-items: center;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.85);
+  z-index: 100;
+  color: white;
+}
+nav a {
+  text-decoration: none;
+  display: block;
+  padding: 1rem 1.5rem;
+  color: white;
+  margin: 0 1rem;
+}
+nav {
+  display: flex;
+  gap: 2rem;
+  background: black;
+  margin-bottom: 3rem;
+}
+button {
+  font-size: large;
+  padding: 0.5rem 3rem;
+  border-radius: 0.5rem;
+  border: 1px dashed black;
 }

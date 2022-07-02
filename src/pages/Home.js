@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { loadModels } from './api/faceapi';
-import { getVideoDuration, getSnapShot } from './api/snapShotapi';
-import './App.css';
+import { loadModels } from './../api/faceapi';
+import { getVideoDuration, getSnapShot } from './../api/snapShotapi';
 
-function App() {
+function Home() {
   const [shots, setShots] = useState([]);
   const [students, setStudents] = useState([]);
   const [status, setStatus] = useState('Input A Video');
@@ -95,4 +94,4 @@ function App() {
   );
 }
 
-export default App;
+export default Home;
