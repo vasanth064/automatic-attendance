@@ -1,6 +1,22 @@
 import * as faceapi from 'face-api.js';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { db } from '../firebaseConfig';
 
-const faceData = require('./../faceData/faceData.json');
+const getData = async (table, q) => {
+  const dataRef = collection(db, table);
+  try {
+    if (q) {
+      const qq = query(dataRef, ...q);
+      const data = await getDocs(qq);
+      return data.docs.map((doc) => ({ ...doc.data(), uid: doc.id }));
+    } else {
+      const data = await getDocs(dataRef);
+      return data.docs.map((doc) => ({ ...doc.data(), uid: doc.id }));
+    }
+  } catch {
+    return `Failed to Get Data from ${table}`;
+  }
+};
 
 const maxDescriptorDistance = 0.5;
 let snapShotDescription = [];
@@ -31,8 +47,8 @@ export async function createMatcher(faceProfile) {
   let labeledDescriptors = faceProfile.map(
     (member) =>
       new faceapi.LabeledFaceDescriptors(
-        member.name,
-        member.descriptors.map((descriptor) => new Float32Array(descriptor))
+        member.rollno,
+        member.face_data.map((descriptor) => new Float32Array(descriptor.des))
       )
   );
   let faceMatcher = new faceapi.FaceMatcher(
@@ -41,7 +57,12 @@ export async function createMatcher(faceProfile) {
   );
   return faceMatcher;
 }
-export async function getFaceRecognition(snapShots) {
+
+export async function getFaceRecognition(snapShots, department, batch) {
+  const faceData = await getData('faceData', [
+    where('batch', '==', batch),
+    where('department', '==', department),
+  ]);
   macth = [];
   snapShotDescription = [];
   for (let shot of snapShots) {
